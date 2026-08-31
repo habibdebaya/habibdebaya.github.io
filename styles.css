@@ -1,0 +1,142 @@
+@font-face {
+  font-family: "Departure Mono";
+  src: url("assets/fonts/DepartureMono-Regular.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+:root {
+  --background: #151922;
+  --text: #d4d9d4;
+  --green: #7dff8c;
+  --blue: #6eb5ff;
+  --selection: #23482a;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  color: var(--text);
+  background: var(--background);
+  font-family: "Departure Mono", monospace;
+  font-size: 16.5px;
+  line-height: 1.55;
+  -webkit-font-smoothing: none;
+}
+
+::selection { background: var(--selection); }
+
+main {
+  width: min(100% - 40px, 760px);
+  margin: 0 auto;
+  padding: 28px 0 52px;
+}
+
+section { margin-bottom: 30px; }
+.intro { display: flow-root; }
+
+h1,
+h2 {
+  margin: 0 0 8px;
+  color: var(--green);
+  font: inherit;
+}
+
+p { margin: 0 0 8px; }
+
+a {
+  color: var(--blue);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+a:hover { color: var(--green); }
+
+.work-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.work-list li {
+  position: relative;
+  margin-bottom: 6px;
+  padding-left: 20px;
+}
+
+.work-list li::before {
+  position: absolute;
+  top: 0.7em;
+  left: 3px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  content: "";
+  transform: translateY(-50%);
+}
+
+.snake-panel {
+  width: max-content;
+  margin: 48px auto 0;
+  padding: 14px;
+  color: var(--green);
+  background: var(--background);
+  font-size: 13.75px;
+  line-height: 1.18;
+  user-select: none;
+}
+
+.snake-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+
+#snake-status,
+.snake-note {
+  color: #7f899a;
+  font-size: 11px;
+}
+
+#snake-board {
+  margin: 0;
+  color: var(--green);
+  font: inherit;
+  line-height: 1.05;
+}
+
+.snake-note { margin: 6px 0 0; }
+
+.snake-panel.is-crashed {
+  color: #ff6b7f;
+}
+
+.snake-panel.is-crashed #snake-board,
+.snake-panel.is-crashed #snake-status {
+  animation: snake-redout 260ms steps(3) forwards;
+}
+
+@keyframes snake-redout {
+  from { color: var(--green); }
+  to { color: #ff6b7f; }
+}
+
+@media (max-width: 600px) {
+  body { font-size: 13.75px; }
+  main {
+    width: 100%;
+    padding: 18px 14px 36px;
+  }
+  section { margin-bottom: 26px; }
+  .snake-panel { font-size: 11px; }
+  #snake-status, .snake-note { font-size: 11px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .snake-panel.is-crashed #snake-board,
+  .snake-panel.is-crashed #snake-status { animation: none; color: #ff6b7f; }
+}
