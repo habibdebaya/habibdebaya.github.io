@@ -198,10 +198,6 @@ a:hover { color: var(--green); }
   #snake-status, .snake-note { font-size: 11px; }
 }
 
-@media (max-width: 520px) {
-  .flow-inputs, .flow-branches { grid-template-columns: 1fr; }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .snake-panel.is-crashed #snake-board,
   .snake-panel.is-crashed #snake-status { animation: none; color: #ff6b7f; }
