@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Where Agent Access Is Heading — Habib Debaya on identity, permissions, and the judgments that govern what agents may do." />
+    <meta name="author" content="Habib Debaya" />
+    <title>Where Agent Access Is Heading — Habib Debaya</title>
+    <link rel="icon" href="../../favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="../../styles.css?v=3" />
+  </head>
+  <body>
+    <main>
+      <nav class="writing-nav" aria-label="Back to homepage">
+        <a href="../../#writings">← Writings</a>
+      </nav>
+      <article>
+        <header class="writing-header">
+          <h1>Where Agent Access Is Heading</h1>
+          <p class="writing-date"><time datetime="2026-09-20">September 20, 2026</time></p>
+        </header>
+        <div class="writing-body">
+          <p>To examine how businesses will manage agent access, consider an employee asking an agent to read an internal outage report and email an update to a customer. Following that task through the agent&#x27;s execution loop shows where today&#x27;s approaches work and where they fall short.</p>
+          <figure class="writing-diagram" aria-label="The agent execution loop">
+            <ol class="flow-steps">
+              <li>Who is acting</li>
+              <li>What the model may see</li>
+              <li>What the model proposes</li>
+              <li>Whether it may act</li>
+            </ol>
+            <div class="flow-branches">
+              <div>
+                <p class="flow-label">Approved action ↓</p>
+                <div class="flow-node">5. How it reaches the world</div>
+                <p class="flow-note">Tool result ↺ back to step 2</p>
+              </div>
+              <div>
+                <p class="flow-label">Final answer ↓</p>
+                <div class="flow-node">6. What the last check can catch</div>
+              </div>
+            </div>
+          </figure>
+          <section>
+            <h2>1. Who is acting</h2>
+            <p>The application begins by identifying the employee and establishing what the agent may do on their behalf. On its execution workers, <a href="https://docs.gitlab.com/user/duo_agent_platform/composite_identity/">GitLab</a> combines user and agent identities in an OAuth token and restricts operations to permissions held by both. Because the service enforces that restriction, the model cannot expand its authority simply by requesting more access. Identity settles who is acting, and nothing about which reads may safely combine with which later writes.</p>
+          </section>
+          <section>
+            <h2>2. What the model may see</h2>
+            <p>The surrounding application, called the harness, then supplies the model with the task, tools, and evidence. Here, it retrieves the outage report after checking access and freshness. Search can locate relevant information, but it cannot establish permission to use it. Those permissions must also be rechecked when saved summaries are reused, so memory cannot bypass revoked access.</p>
+          </section>
+          <section>
+            <h2>3. What the model proposes</h2>
+            <p>From that evidence, the model drafts an update and requests a send through a schema with a customer identifier and message body. A well-formed message can still claim permanent recovery when the report only confirms restored service.</p>
+          </section>
+          <section>
+            <h2>4. Whether it may act</h2>
+            <p>Several approaches govern whether it may be sent. <a href="https://sealgate.ai/docs/admin-guide/policy-rules">SealGate</a> evaluates policies over identity, tool arguments, and session history in Common Expression Language, so once private data and untrusted content have both entered a session, an outbound write is held for approval or blocked. That defeats an injected instruction without detecting it, and the limits follow from the same design. The gateway sees only the calls that pass through it, a deterministic engine enforces a wrong label as reliably as a right one, and a derived output inherits the highest sensitivity of anything that influenced it. So the system either blocks every write after a private read, which stops the legitimate update, or it needs a judgment about when a lower-sensitivity release is safe.</p>
+            <figure class="writing-diagram" aria-label="A policy decision after private and untrusted reads">
+              <div class="flow-inputs">
+                <div class="flow-node">Private read</div>
+                <div class="flow-node">Untrusted read</div>
+              </div>
+              <p class="flow-label">↓</p>
+              <div class="flow-node">Session carries both flags</div>
+              <p class="flow-label">↓</p>
+              <div class="flow-node">Outbound write</div>
+              <div class="flow-branches">
+                <div>
+                  <p class="flow-label">Rule ↓</p>
+                  <div class="flow-node">Blocked, legitimate update included</div>
+                </div>
+                <div>
+                  <p class="flow-label">Judgment ↓</p>
+                  <div class="flow-node">Released at lower sensitivity</div>
+                </div>
+              </div>
+            </figure>
+            <p>For that judgment, <a href="https://www.anthropic.com/engineering/claude-code-auto-mode">Claude Code&#x27;s auto mode</a> uses a learned classifier to compare user requests with selected tool calls. It strips tool results as its primary injection defense, so it cannot check the drafted message against the report, which arrived as a tool result. <a href="https://help.shopify.com/en/manual/ai-powered-tools/sidekick/set-up">Shopify&#x27;s Sidekick</a> places the decision with merchants, requiring approval before applying store changes. Humans can weigh cases that resist fixed rules, though they misread evidence too, and approving every action slows automation. For the email, release needs someone with disclosure authority approving the exact message, recipient, and source version.</p>
+          </section>
+          <section>
+            <h2>5. How it reaches the world</h2>
+            <p>Approved actions reach external systems through connection infrastructure. <a href="https://developer.konghq.com/plugins/ai-mcp-proxy/">Kong</a> applies access lists to tool discovery and invocation through Model Context Protocol, which standardizes tool interfaces. <a href="https://docs.composio.dev/docs/tools-direct/authenticating-tools">Composio</a> handles per-user authentication to those tools through OAuth or API keys.</p>
+            <p>When agents run code, <a href="https://cursor.com/blog/agent-sandboxing">Cursor</a> restricts Linux filesystem access with Landlock and system calls with seccomp. <a href="https://modal.com/blog/how-ramp-built-a-full-context-background-coding-agent-on-modal">Ramp takes a hosted approach</a>, running each Inspect session inside a Modal Sandbox. These constrain what the agent can reach and close the routes a gateway never sees. An allowed email service can still carry confidential information, so the disclosure check has to happen before the send.</p>
+          </section>
+          <section>
+            <h2>6. What the last check can catch</h2>
+            <p><a href="https://docs.github.com/en/copilot/concepts/agents/cloud-agent/risks-and-mitigations">GitHub&#x27;s Copilot cloud agent</a> runs CodeQL, dependency checks, and secret scanning by default, with human review required before merging, and <a href="https://developer.salesforce.com/docs/ai/agentforce/guide/trust.html">Salesforce&#x27;s Einstein Trust Layer</a> screens generated text for toxicity. Neither establishes factual accuracy, and a check on the final response cannot retract a disclosure that already left. Evaluation therefore has to measure useful completion alongside prevented violations, since a system that blocks every send prevents every violation.</p>
+          </section>
+          <section>
+            <h2>Where we&#x27;re heading</h2>
+            <p>Once the dust settles, identity, connectivity, isolation, and logging will be infrastructure. It will carry labels with data across context, memory, subagents, and generated code. What it cannot settle is when a derived output may leave at a lower sensitivity than its sources. That decision is discretionary, and businesses will own the models that make it. Universal human approval scales labor costs, and generic external models leave training priorities and continued access under suppliers&#x27; control. The material for a better judge already exists, since the enforcement point records every call, approval, and override. <a href="https://developer.nvidia.com/blog/from-wafer-out-to-first-token-codifying-supply-chain-expertise-with-nemotron-and-palantir-foundry/">Fine-tuning open models locally</a> turns that record into reusable expertise without proprietary data leaving the company, and <a href="https://www.microsoft.com/en-us/research/publication/textbooks-are-all-you-need-ii-phi-1-5-technical-report/">gains from curated synthetic data</a> show how far focused training improves well-defined tasks. Since <a href="https://arxiv.org/abs/2602.16763">expert-curated benchmarks resist saturation</a>, private benchmarks must represent real workflows, test unseen cases, and measure false approvals alongside useful completion. Refreshing them separates improving judgment from memorized answers, so autonomy expands on demonstrated performance. Small non-generative models returning typed, calibrated decisions in milliseconds, <a href="https://typesafe.ai/blog/introducing-system-one-models-and-jev">as Jev claims</a>, would make a check on every call affordable. Permissions remain independently enforced, human review concentrates on exceptions, and each exception becomes the next training example. The advantage compounds through proprietary experience, targeted training, and control over deployment. The gateway ends up where policy, decisions, and training signal meet.</p>
+            <figure class="writing-diagram" aria-label="How a company-owned judge learns from enforcement and human review">
+              <div class="flow-node">Infrastructure floor<br /><span class="flow-note">Identity, connectivity, isolation, logging</span></div>
+              <p class="flow-label">↓</p>
+              <div class="flow-node">Enforcement point</div>
+              <p class="flow-label">Every call, approval, override ↓</p>
+              <div class="flow-node">Decision record</div>
+              <p class="flow-label">Local fine-tuning ↓</p>
+              <div class="flow-node">Company-owned judge</div>
+              <div class="flow-branches">
+                <div>
+                  <p class="flow-label">Autonomy earned on private benchmarks ↺</p>
+                  <div class="flow-node">Back to enforcement point</div>
+                </div>
+                <div>
+                  <p class="flow-label">Exceptions ↓</p>
+                  <div class="flow-node">Human review</div>
+                  <p class="flow-note">Next training example ↺ back to decision record</p>
+                </div>
+              </div>
+            </figure>
+          </section>
+        </div>
+      </article>
+    </main>
+  </body>
+</html>
